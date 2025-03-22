@@ -1,5 +1,7 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion
+
+echo Checking system requirements...
 
 :: Check for npm
 where npm >nul 2>&1
@@ -21,6 +23,11 @@ if %errorlevel% neq 0 (
 if not exist package.json (
     echo Initializing npm project...
     npm init -y
+    if %errorlevel% neq 0 (
+        echo [ERROR] Failed to initialize npm project.
+        pause
+        exit /b
+    )
 )
 
 :: Check if server/index.js exists
@@ -31,12 +38,21 @@ if not exist server\index.js (
     exit /b
 )
 
-:: Install dependencies if not already installed
-for %%i in (express body-parser cors node-sass-chokidar autoprefixer chokidar-cli npm-run-all postcss-cli) do (
+:: Install required packages one by one
+echo Installing dependencies...
+set packages=express body-parser cors node-sass-chokidar autoprefixer chokidar-cli npm-run-all postcss-cli
+
+for %%i in (%packages%) do (
+    echo Checking %%i...
     npm list -g %%i >nul 2>&1
     if %errorlevel% neq 0 (
         echo Installing %%i...
         npm install -g %%i
+        if %errorlevel% neq 0 (
+            echo [ERROR] Failed to install %%i. Please check npm logs.
+            pause
+            exit /b
+        )
     ) else (
         echo %%i is already installed.
     )
@@ -46,7 +62,7 @@ for %%i in (express body-parser cors node-sass-chokidar autoprefixer chokidar-cl
 if not exist src\scss mkdir src\scss
 if not exist release\css mkdir release\css
 
-:: Create package.json scripts (if not already defined)
+:: Create package.json scripts if not already defined
 echo Updating package.json scripts...
 
 node -e "const fs=require('fs'); let pkg=JSON.parse(fs.readFileSync('package.json')); pkg.scripts={\
@@ -58,11 +74,16 @@ node -e "const fs=require('fs'); let pkg=JSON.parse(fs.readFileSync('package.jso
     'dev': 'npm-run-all -p sass:* server'\
 }; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
 
-:: Run development environment
+:: Start development environment
 echo Starting development server...
-npm run dev
+start cmd /k "npm run dev"
+
+:: Wait a few seconds to ensure the server starts before opening the browser
+timeout /t 5 /nobreak >nul
 
 :: Open the website in default browser
 start http://localhost:3000
 
-exit
+echo Development environment started successfully!
+echo The command prompt will remain open to display logs.
+pause
