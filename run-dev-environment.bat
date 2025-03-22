@@ -17,16 +17,22 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-echo All required dependencies are installed. Proceeding...
-
 :: Check if package.json exists; if not, initialize a new project
 if not exist package.json (
     echo Initializing npm project...
     npm init -y
 )
 
+:: Check if server/index.js exists
+if not exist server\index.js (
+    echo [ERROR] server\index.js not found!
+    echo Please create the Express server file before running this script.
+    pause
+    exit /b
+)
+
 :: Install dependencies if not already installed
-for %%i in (express body-parser cors node-sass-chokidar autoprefixer chokidar-cli npm-run-all postcss-cli live-server) do (
+for %%i in (express body-parser cors node-sass-chokidar autoprefixer chokidar-cli npm-run-all postcss-cli) do (
     npm list -g %%i >nul 2>&1
     if %errorlevel% neq 0 (
         echo Installing %%i...
@@ -39,7 +45,6 @@ for %%i in (express body-parser cors node-sass-chokidar autoprefixer chokidar-cl
 :: Ensure required folder structure exists
 if not exist src\scss mkdir src\scss
 if not exist release\css mkdir release\css
-if not exist server mkdir server
 
 :: Create package.json scripts (if not already defined)
 echo Updating package.json scripts...
@@ -50,29 +55,14 @@ node -e "const fs=require('fs'); let pkg=JSON.parse(fs.readFileSync('package.jso
     'sass:build': 'npm-run-all -p build-task:*',\
     'sass:watch': 'chokidar \"src/scss/**/*.scss\" -c \"npm run sass:build\"',\
     'server': 'node server/index.js',\
-    'dev': 'npm-run-all -p sass:* live-server server'\
+    'dev': 'npm-run-all -p sass:* server'\
 }; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
-
-:: Create a basic Express server file if not exists
-if not exist server\index.js (
-    echo Creating Express server file...
-    echo const express = require('express');> server\index.js
-    echo const bodyParser = require('body-parser');>> server\index.js
-    echo const cors = require('cors');>> server\index.js
-    echo const app = express();>> server\index.js
-    echo app.use(cors());>> server\index.js
-    echo app.use(bodyParser.json());>> server\index.js
-    echo app.use(express.static('release'));>> server\index.js
-    echo app.get('/api/data', (req, res) => { res.json({ message: 'Hello, API!' }); });>> server\index.js
-    echo const PORT = process.env.PORT || 3000;>> server\index.js
-    echo app.listen(PORT, () => console.log('Server running on port ' + PORT));>> server\index.js
-)
 
 :: Run development environment
 echo Starting development server...
 npm run dev
 
-:: Open index.html in default browser
-start release\index.html
+:: Open the website in default browser
+start http://localhost:3000
 
 exit
