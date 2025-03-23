@@ -1,31 +1,40 @@
-const gulp = require('gulp');
-const sass = require('gulp-sass')(require('sass'));
-const browserSync = require('browser-sync').create();
+const gulp = require("gulp");
+const sass = require("gulp-sass")(require("sass"));
+const autoprefixer = require("gulp-autoprefixer");
+const cleanCSS = require("gulp-clean-css");
+const concat = require("gulp-concat");
+const browserSync = require("browser-sync").create();
 
-// Compile SCSS to CSS
+// Compile SCSS into CSS
 function styles() {
-    return gulp.src('src/scss/main.scss')
-        .pipe(sass({ outputStyle: 'compressed' }).on('error', sass.logError))
-        .pipe(gulp.dest('release'))
-        .pipe(browserSync.stream());
+  return gulp
+    .src("src/scss/main.scss")
+    .pipe(sass().on("error", sass.logError))
+    .pipe(autoprefixer({ cascade: false }))
+    .pipe(cleanCSS())
+    .pipe(gulp.dest("release/css"))
+    .pipe(browserSync.stream());
 }
 
-// Move HTML and JS files to release folder
-function copyFiles() {
-    return gulp.src(['release/index.html', 'release/js/**/*.js'])
-        .pipe(gulp.dest('release'))
-        .pipe(browserSync.stream());
+// Copy JS to release folder
+function scripts() {
+  return gulp.src("src/js/**/*.js").pipe(concat("script.js")).pipe(gulp.dest("release/js"));
 }
 
-// Watch for file changes
+// Watch files for changes
 function watchFiles() {
-    browserSync.init({
-        server: { baseDir: 'release' }
-    });
-    gulp.watch('src/scss/**/*.scss', styles);
-    gulp.watch('release/js/**/*.js', copyFiles);
-    gulp.watch('release/index.html', copyFiles);
+  browserSync.init({
+    server: { baseDir: "release" },
+    notify: false,
+  });
+
+  gulp.watch("src/scss/**/*.scss", styles);
+  gulp.watch("src/js/**/*.js", scripts).on("change", browserSync.reload);
+  gulp.watch("release/*.html").on("change", browserSync.reload);
 }
+
+// Build task
+gulp.task("build", gulp.parallel(styles, scripts));
 
 // Default task
-exports.default = gulp.series(styles, copyFiles, watchFiles);
+gulp.task("default", gulp.series("build", watchFiles));
