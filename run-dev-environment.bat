@@ -1,4 +1,13 @@
 @echo off
+:: Check if running as administrator
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo ERROR: This script must be run as Administrator.
+    echo Please right-click on install.bat and select "Run as administrator".
+    pause
+    exit /b
+)
+
 echo Checking for Node.js...
 node -v >nul 2>&1
 if %errorlevel% neq 0 (

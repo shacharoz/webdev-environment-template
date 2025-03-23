@@ -1,1 +1,40 @@
-p {}
+* {
+  display: flex;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+.btn {
+  display: flex;
+  background-color: transparent;
+  color: salmon;
+  border: 3px solid salmon;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+.btn:hover {
+  background-color: salmon;
+  color: #fff;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  background-color: rgb(0, 98.4, 204);
+}
+
+div {
+  display: inline-flex;
+  color: blue;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+}
