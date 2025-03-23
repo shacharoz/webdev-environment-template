@@ -3,13 +3,17 @@
   "version": "1.2.0",
   "description": "your-project-description",
   "scripts": {
-        "start": "gulp"
-    },
-    "dependencies": {},
-    "devDependencies": {
-        "browser-sync": "^2.27.10",
-        "gulp": "^4.0.2",
-        "gulp-sass": "^5.1.0",
-        "sass": "^1.49.9"
-    }
+    "dev": "gulp",
+    "build": "gulp build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-sass": "^5.1.0",
+    "sass": "^1.64.2",
+    "gulp-autoprefixer": "^8.0.0",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-concat": "^2.6.1",
+    "browser-sync": "^2.29.3"
+  }
 }
